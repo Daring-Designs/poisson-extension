@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=320">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <!-- ═══ Tab Bar ═══════════════════════════════════════════════════════════ -->
+  <!-- Three tabs: Status (live stats), Log (activity feed), Settings        -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="status">Status</button>
+    <button class="tab-btn" data-tab="log">Log</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </nav>
+
+  <!-- ═══ Status Tab ════════════════════════════════════════════════════════ -->
+  <!-- Shows engine state, daily stats, intensity control, and bandwidth     -->
+  <div id="tab-status" class="tab-panel active">
+
+    <!-- Shown when engine is stopped -->
+    <div id="stopped-view">
+      <div class="hero">
+        <div class="hero-icon">&#x1F421;</div>
+        <div class="hero-title">Poisson</div>
+        <div class="hero-sub">Browsing noise generator</div>
+      </div>
+      <button id="btn-start" class="btn-primary">Start Engine</button>
+    </div>
+
+    <!-- Shown when engine is running -->
+    <div id="running-view" style="display:none;">
+
+      <!-- Today's counters -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-searches">0</div>
+          <div class="stat-label">Searches</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-browses">0</div>
+          <div class="stat-label">Pages</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-ads">0</div>
+          <div class="stat-label">Ad Clicks</div>
+        </div>
+      </div>
+
+      <!-- All-time stats -->
+      <div class="stats-row secondary">
+        <div class="stat-mini">
+          <span class="stat-mini-value" id="stat-total">0</span>
+          <span class="stat-mini-label">all-time</span>
+        </div>
+        <div class="stat-mini">
+          <span class="stat-mini-value" id="stat-days">0</span>
+          <span class="stat-mini-label">days active</span>
+        </div>
+      </div>
+
+      <!-- Intensity selector (controls Poisson lambda rate) -->
+      <div class="control-group">
+        <label class="control-label">Intensity</label>
+        <div class="pill-group" id="intensity-selector">
+          <button class="pill" data-value="low">Low</button>
+          <button class="pill active" data-value="medium">Med</button>
+          <button class="pill" data-value="high">High</button>
+          <button class="pill" data-value="paranoid">Max</button>
+        </div>
+      </div>
+
+      <!-- Bandwidth usage chart (last 24 hours) -->
+      <div class="bandwidth-section">
+        <div class="bandwidth-header">
+          <label class="control-label">Bandwidth</label>
+          <div class="bandwidth-values">
+            <span id="bw-session">0 KB</span> session &middot; <span id="bw-today">0 KB</span> today
+          </div>
+        </div>
+        <canvas id="bw-chart" width="288" height="60"></canvas>
+      </div>
+
+      <button id="btn-stop" class="btn-danger">Stop Engine</button>
+    </div>
+  </div>
+
+  <!-- ═══ Log Tab ═══════════════════════════════════════════════════════════ -->
+  <!-- Live activity feed: every action the extension takes is logged here.  -->
+  <!-- System events (start/stop/settings changes) also appear in the log.  -->
+  <div id="tab-log" class="tab-panel">
+    <div class="log-header">
+      <span class="log-count" id="log-count">0 entries</span>
+    </div>
+    <div id="log-list" class="log-list">
+      <div class="log-empty">No activity yet. Start the engine to generate noise.</div>
+    </div>
+    <button id="btn-clear-log" class="btn-secondary">Clear Log</button>
+  </div>
+
+  <!-- ═══ Settings Tab ══════════════════════════════════════════════════════ -->
+  <!-- All settings are saved locally — nothing is sent to any server.       -->
+  <div id="tab-settings" class="tab-panel">
+
+    <!-- Which search engines to use for "search" noise tasks -->
+    <section class="settings-section">
+      <h3 class="settings-heading">Search Engines</h3>
+      <div id="engine-list" class="engine-list"></div>
+    </section>
+
+    <!-- Relative probability of each task type -->
+    <section class="settings-section">
+      <h3 class="settings-heading">Task Mix</h3>
+      <div class="task-mix">
+        <div class="mix-row">
+          <label>Search</label>
+          <input type="range" id="mix-search" min="0" max="100" value="45" class="mix-slider">
+          <span class="mix-value" id="mix-search-val">45%</span>
+        </div>
+        <div class="mix-row">
+          <label>Browse</label>
+          <input type="range" id="mix-browse" min="0" max="100" value="40" class="mix-slider">
+          <span class="mix-value" id="mix-browse-val">40%</span>
+        </div>
+        <div class="mix-row">
+          <label>Ad Click</label>
+          <input type="range" id="mix-ad" min="0" max="100" value="15" class="mix-slider">
+          <span class="mix-value" id="mix-ad-val">15%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Which categories of sites to include in noise -->
+    <section class="settings-section">
+      <h3 class="settings-heading">Site Categories</h3>
+      <div id="category-list" class="category-list"></div>
+    </section>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

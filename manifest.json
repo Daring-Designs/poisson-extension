@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Poisson — Browsing Noise Generator",
+  "version": "1.0.0",
+  "description": "Generates decoy browsing noise using Poisson-process scheduling to make your real browsing activity harder to profile.",
+  "permissions": [
+    "alarms",
+    "storage",
+    "tabs",
+    "scripting",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
