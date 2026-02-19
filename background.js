@@ -318,6 +318,35 @@ let pendingTasks = [];            // Tasks queued for the current alarm period
 let noiseTabIds = new Set();      // Tab IDs of currently-open noise tabs (used to filter webRequest)
 let sessionBandwidth = 0;         // Bytes generated this session (since last Start)
 
+// ─── Service Worker Wake-Up Guard ────────────────────────────────────────────
+// Chrome MV3 terminates the service worker after ~30 seconds of inactivity.
+// When it restarts, all in-memory state is lost (running=false, pendingTasks=[]).
+// This guard restores the `running` flag from chrome.storage.local and re-creates
+// the alarm + first task batch if the engine was supposed to be running.
+// Every handler that depends on `running` must await this before proceeding.
+
+let _initPromise = null;
+
+async function ensureInitialized() {
+  if (_initPromise) return _initPromise;
+  _initPromise = (async () => {
+    const { running: wasRunning } = await chrome.storage.local.get('running');
+    if (wasRunning && !running) {
+      running = true;
+      // Re-create the alarm if it was lost during service worker restart
+      const existingAlarm = await chrome.alarms.get(ALARM_NAME);
+      if (!existingAlarm) {
+        chrome.alarms.create(ALARM_NAME, { periodInMinutes: 1 });
+      }
+      // Generate tasks so the next alarm tick has something to dispatch
+      if (pendingTasks.length === 0) {
+        await scheduleTasks();
+      }
+    }
+  })();
+  return _initPromise;
+}
+
 
 // ─── Utility Functions ──────────────────────────────────────────────────────────
 
@@ -874,6 +903,7 @@ async function scheduleTasks() {
 // Called every 60 seconds by the Chrome alarm.
 async function onAlarm(alarm) {
   if (alarm.name !== ALARM_NAME) return;
+  await ensureInitialized();
   if (!running) return;
 
   // Grab the tasks generated during the previous scheduling pass
@@ -925,6 +955,7 @@ chrome.webRequest.onCompleted.addListener(
 // These are the only two functions that change the running state.
 
 async function startEngine() {
+  _initPromise = null; // Reset init guard so future wake-ups re-read storage
   await saveRunning(true);
   sessionBandwidth = 0;
   await chrome.storage.local.set({ sessionStart: Date.now() });
@@ -944,6 +975,7 @@ async function startEngine() {
 }
 
 async function stopEngine() {
+  _initPromise = null; // Reset init guard so future wake-ups re-read storage
   const taskCount = noiseTabIds.size;
   await saveRunning(false);
   chrome.alarms.clear(ALARM_NAME);
@@ -969,6 +1001,7 @@ async function stopEngine() {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
+    await ensureInitialized();
     switch (message.action) {
 
       // ── Engine controls ──

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Poisson — Browsing Noise Generator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generates decoy browsing noise using Poisson-process scheduling to make your real browsing activity harder to profile.",
   "permissions": [
     "alarms",
