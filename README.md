@@ -57,7 +57,8 @@ git clone https://github.com/daring-designs/poisson-extension.git
 ```
 
 **Option B — Download ZIP:**
-Download and extract the repository to a folder on your computer (e.g., `~/poisson-extension`). Remember where you put it.
+1. Download the latest release: [poisson-extension-v1.0.0.zip](https://github.com/Daring-Designs/poisson-extension/releases/latest/download/poisson-extension-v1.0.0.zip)
+2. Extract the zip to a folder on your computer (e.g., `~/poisson-extension`)
 
 ### Step 2: Open Chrome Extensions Page
 
